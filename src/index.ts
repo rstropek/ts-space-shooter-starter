@@ -1,6 +1,7 @@
 import { Scene, Types, CANVAS, Game, Physics, Input } from 'phaser';
 import { Spaceship, Direction } from './spaceship';
 import { Bullet } from './bullet';
+import { Meteor } from './meteor';
 
 /**
  * Space shooter scene
@@ -10,9 +11,11 @@ import { Bullet } from './bullet';
  */
 class ShooterScene extends Scene {
     private spaceShip: Spaceship;
+    private meteors: Physics.Arcade.Group;
     private bullets: Physics.Arcade.Group;
 
     private bulletTime = 0;
+    private meteorTime = 0;
 
     private cursors: Types.Input.Keyboard.CursorKeys;
     private spaceKey: Input.Keyboard.Key;
@@ -33,6 +36,11 @@ class ShooterScene extends Scene {
         this.bullets = this.physics.add.group({
             classType: Bullet,
             maxSize: 10,
+            runChildUpdate: true
+        });
+        this.meteors = this.physics.add.group({
+            classType: Meteor,
+            maxSize: 20,
             runChildUpdate: true
         });
 
@@ -62,6 +70,8 @@ class ShooterScene extends Scene {
         if (this.spaceKey.isDown) {
             this.fireBullet();
         }
+
+        this.handleMeteors();
     }
 
     fireBullet() {
@@ -71,6 +81,18 @@ class ShooterScene extends Scene {
             if (bullet) {
                 bullet.fire(this.spaceShip.x, this.spaceShip.y);
                 this.bulletTime = this.time.now + 100;
+            }
+        }
+    }
+
+    handleMeteors() {
+        // Check if it is time to launch a new meteor.
+        if (this.time.now > this.meteorTime) {
+            // Find first meteor that is currently not used
+            const meteor = this.meteors.get() as Meteor;
+            if (meteor) {
+                meteor.fall();
+                this.meteorTime = this.time.now + 500 + 1000 * Math.random();
             }
         }
     }
