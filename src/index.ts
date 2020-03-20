@@ -1,5 +1,6 @@
-import { Scene, Types, CANVAS, Game } from 'phaser';
+import { Scene, Types, CANVAS, Game, Physics, Input } from 'phaser';
 import { Spaceship, Direction } from './spaceship';
+import { Bullet } from './bullet';
 
 /**
  * Space shooter scene
@@ -9,7 +10,12 @@ import { Spaceship, Direction } from './spaceship';
  */
 class ShooterScene extends Scene {
     private spaceShip: Spaceship;
+    private bullets: Physics.Arcade.Group;
+
+    private bulletTime = 0;
+
     private cursors: Types.Input.Keyboard.CursorKeys;
+    private spaceKey: Input.Keyboard.Key;
 
     preload() {
         // Preload images so that we can use them in our game
@@ -23,6 +29,13 @@ class ShooterScene extends Scene {
         //  Add a background
         this.add.tileSprite(0, 0, this.game.canvas.width, this.game.canvas.height, 'space').setOrigin(0, 0);
 
+        // Create bullets and meteors
+        this.bullets = this.physics.add.group({
+            classType: Bullet,
+            maxSize: 10,
+            runChildUpdate: true
+        });
+
         // Add the sprite for our space ship.
         this.spaceShip = new Spaceship(this);
         this.physics.add.existing(this.children.add(this.spaceShip));
@@ -33,6 +46,8 @@ class ShooterScene extends Scene {
 
         // Setup game input handling
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.input.keyboard.addCapture([' ']);
+        this.spaceKey = this.input.keyboard.addKey(Input.Keyboard.KeyCodes.SPACE);
     }
     
     update(_, delta: number) {
@@ -42,6 +57,21 @@ class ShooterScene extends Scene {
         }
         else if (this.cursors.right.isDown) {
             this.spaceShip.move(delta, Direction.Right);
+        }
+
+        if (this.spaceKey.isDown) {
+            this.fireBullet();
+        }
+    }
+
+    fireBullet() {
+        if (this.time.now > this.bulletTime) {
+            // Find the first unused (=unfired) bullet
+            const bullet = this.bullets.get() as Bullet;
+            if (bullet) {
+                bullet.fire(this.spaceShip.x, this.spaceShip.y);
+                this.bulletTime = this.time.now + 100;
+            }
         }
     }
 }
