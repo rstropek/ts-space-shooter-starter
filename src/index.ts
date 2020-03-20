@@ -19,6 +19,7 @@ class ShooterScene extends Scene {
 
     private cursors: Types.Input.Keyboard.CursorKeys;
     private spaceKey: Input.Keyboard.Key;
+    private isGameOver = false;
 
     preload() {
         // Preload images so that we can use them in our game
@@ -29,6 +30,10 @@ class ShooterScene extends Scene {
     }
 
     create() {
+        if (this.isGameOver) {
+            return;
+        }
+        
         //  Add a background
         this.add.tileSprite(0, 0, this.game.canvas.width, this.game.canvas.height, 'space').setOrigin(0, 0);
 
@@ -61,6 +66,7 @@ class ShooterScene extends Scene {
             meteor.kill();
             bullet.kill();
         }, null, this);
+        this.physics.add.collider(this.spaceShip, this.meteors, this.gameOver, null, this);
     }
 
     update(_, delta: number) {
@@ -100,6 +106,19 @@ class ShooterScene extends Scene {
                 this.meteorTime = this.time.now + 500 + 1000 * Math.random();
             }
         }
+    }
+
+    gameOver() {
+        this.isGameOver = true;
+
+        this.bullets.getChildren().forEach((b: Bullet) => b.kill());
+        this.meteors.getChildren().forEach((m: Meteor) => m.kill());
+        this.spaceShip.kill();
+
+        // Display "game over" text
+        const text = this.add.text(this.game.canvas.width / 2, this.game.canvas.height / 2, "Game Over :-(", 
+            { font: "65px Arial", fill: "#ff0044", align: "center" });
+        text.setOrigin(0.5, 0.5);
     }
 }
 
