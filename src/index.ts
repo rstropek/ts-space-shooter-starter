@@ -1,4 +1,4 @@
-import { Scene, CANVAS, Game } from 'phaser';
+import { Scene, CANVAS, Game, GameObjects } from 'phaser';
 
 /**
  * Space shooter scene
@@ -7,6 +7,8 @@ import { Scene, CANVAS, Game } from 'phaser';
  * https://photonstorm.github.io/phaser3-docs/Phaser.Scenes.Systems.html.
  */
 class ShooterScene extends Scene {
+    private spaceShip: GameObjects.Image;
+
     preload() {
         // Preload images so that we can use them in our game
         this.load.image('space', 'images/deep-space.jpg');
@@ -18,6 +20,14 @@ class ShooterScene extends Scene {
     create() {
         //  Add a background
         this.add.tileSprite(0, 0, this.game.canvas.width, this.game.canvas.height, 'space').setOrigin(0, 0);
+
+        // Add the sprite for our space ship.
+        this.spaceShip = this.add.image(0, 0, 'ship');
+        this.physics.add.existing(this.spaceShip);
+
+        // Position the spaceship horizontally in the middle of the screen
+        // and vertically at the bottom of the screen.
+        this.spaceShip.setPosition(this.game.canvas.width / 2, this.game.canvas.height * 0.9);
     }
 }
 
