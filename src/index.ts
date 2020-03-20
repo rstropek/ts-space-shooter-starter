@@ -1,10 +1,5 @@
-import { Scene, Types, CANVAS, Game, GameObjects } from 'phaser';
-
-/** Possible movement directions */
-export enum Direction {
-    Left = -1, 
-    Right = 1 
-}
+import { Scene, Types, CANVAS, Game } from 'phaser';
+import { Spaceship, Direction } from './spaceship';
 
 /**
  * Space shooter scene
@@ -13,8 +8,7 @@ export enum Direction {
  * https://photonstorm.github.io/phaser3-docs/Phaser.Scenes.Systems.html.
  */
 class ShooterScene extends Scene {
-    private spaceShip: GameObjects.Image;
-    private speed: number;
+    private spaceShip: Spaceship;
     private cursors: Types.Input.Keyboard.CursorKeys;
 
     preload() {
@@ -23,8 +17,6 @@ class ShooterScene extends Scene {
         this.load.image('bullet', 'images/scratch-laser.png');
         this.load.image('ship', 'images/scratch-spaceship.png');
         this.load.image('meteor', 'images/scratch-meteor.png');
-
-        this.speed = Phaser.Math.GetSpeed(200, 1);
     }
 
     create() {
@@ -32,8 +24,8 @@ class ShooterScene extends Scene {
         this.add.tileSprite(0, 0, this.game.canvas.width, this.game.canvas.height, 'space').setOrigin(0, 0);
 
         // Add the sprite for our space ship.
-        this.spaceShip = this.add.image(0, 0, 'ship');
-        this.physics.add.existing(this.spaceShip);
+        this.spaceShip = new Spaceship(this);
+        this.physics.add.existing(this.children.add(this.spaceShip));
 
         // Position the spaceship horizontally in the middle of the screen
         // and vertically at the bottom of the screen.
@@ -46,20 +38,11 @@ class ShooterScene extends Scene {
     update(_, delta: number) {
         // Move ship if cursor keys are pressed
         if (this.cursors.left.isDown) {
-            this.move(delta, Direction.Left);
+            this.spaceShip.move(delta, Direction.Left);
         }
         else if (this.cursors.right.isDown) {
-            this.move(delta, Direction.Right);
+            this.spaceShip.move(delta, Direction.Right);
         }
-    }
-    
-    move(delta: number, direction: Direction) {
-        // Change position
-        this.spaceShip.x += this.speed * delta * direction;
-
-        // Make sure spaceship cannot leave world boundaries
-        this.spaceShip.x = Phaser.Math.Clamp(this.spaceShip.x, this.spaceShip.width / 2,
-            this.game.canvas.width - this.spaceShip.width / 2);
     }
 }
 
