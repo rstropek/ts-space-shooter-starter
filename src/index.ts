@@ -56,8 +56,13 @@ class ShooterScene extends Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
         this.input.keyboard.addCapture([' ']);
         this.spaceKey = this.input.keyboard.addKey(Input.Keyboard.KeyCodes.SPACE);
+
+        this.physics.add.collider(this.bullets, this.meteors, (bullet: Bullet, meteor: Meteor) => {
+            meteor.kill();
+            bullet.kill();
+        }, null, this);
     }
-    
+
     update(_, delta: number) {
         // Move ship if cursor keys are pressed
         if (this.cursors.left.isDown) {
