@@ -1,4 +1,4 @@
-import { Scene, Types, CANVAS, Game, Physics, Input } from 'phaser';
+import { Scene, Types, CANVAS, Game, Physics, Input, GameObjects } from 'phaser';
 import { Spaceship, Direction } from './spaceship';
 import { Bullet } from './bullet';
 import { Meteor } from './meteor';
@@ -13,6 +13,7 @@ class ShooterScene extends Scene {
     private spaceShip: Spaceship;
     private meteors: Physics.Arcade.Group;
     private bullets: Physics.Arcade.Group;
+    private points: GameObjects.Text;
 
     private bulletTime = 0;
     private meteorTime = 0;
@@ -20,6 +21,7 @@ class ShooterScene extends Scene {
     private cursors: Types.Input.Keyboard.CursorKeys;
     private spaceKey: Input.Keyboard.Key;
     private isGameOver = false;
+    private hits = 0;
 
     preload() {
         // Preload images so that we can use them in our game
@@ -36,6 +38,9 @@ class ShooterScene extends Scene {
         
         //  Add a background
         this.add.tileSprite(0, 0, this.game.canvas.width, this.game.canvas.height, 'space').setOrigin(0, 0);
+
+        this.points = this.add.text(this.game.canvas.width * 0.1, this.game.canvas.height * 0.1, "0", 
+            { font: "32px Arial", fill: "#ff0044", align: "left" });
 
         // Create bullets and meteors
         this.bullets = this.physics.add.group({
@@ -63,8 +68,11 @@ class ShooterScene extends Scene {
         this.spaceKey = this.input.keyboard.addKey(Input.Keyboard.KeyCodes.SPACE);
 
         this.physics.add.collider(this.bullets, this.meteors, (bullet: Bullet, meteor: Meteor) => {
-            meteor.kill();
-            bullet.kill();
+            if (meteor.active && bullet.active) {
+                this.points.setText((++this.hits).toString())
+                meteor.kill();
+                bullet.kill();
+            }
         }, null, this);
         this.physics.add.collider(this.spaceShip, this.meteors, this.gameOver, null, this);
     }
